@@ -4,6 +4,7 @@
 * Contact Admin extension for the phpBB Forum Software package.
 *
 * @copyright 2016 Rich McGirr (RMcGirr83)
+* @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
 * @license GNU General Public License, version 2 (GPL-2.0)
 * German translation by NetSecond.net 02/2024
 *
@@ -38,10 +39,8 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, [
-	'ADMINS_NOT_EXIST_FOR_METHOD'	=> [
-		0 => 'Es gibt keine Administratoren, die Kontakt über E-Mails erlauben.  Es muss eine andere Art der Kontaktaufnahme gewählt werden.',
-		2 => 'Es gibt keine Administratoren, die Kontakt über private Nachrichten erlauben.  Es muss eine andere Art der Kontaktaufnahme gewählt werden.',
-	],
+	'ADMINS_NOT_EXIST_EMAIL'		=> 'Es gibt keine Administratoren, die Kontakt über E-Mails erlauben. Es muss eine andere Art der Kontaktaufnahme gewählt werden.',
+	'ADMINS_NOT_EXIST_PM'		=> 'Es gibt keine Administratoren, die Kontakt über private Nachrichten erlauben. Es muss eine andere Art der Kontaktaufnahme gewählt werden.',
 	'CONTACT_CONFIG_SAVED'			=> 'Die Admin-kontaktieren-Konfiguration wurde aktualisiert.',
 	'CONTACT_ACP_CONFIRM'				=> 'Visuelle Bestätigung aktivieren',
 	'CONTACT_ACP_CONFIRM_EXPLAIN'		=> 'Wenn aktiviert, müssen Benutzer zum Senden einer Nachricht eine visuelle Bestätigung durchführen.<br>Dies dient der Vermeidung von Spam Nachrichten. Bitte beachten, dass diese Option nur für das Kontaktformular dient. Dies beeinflusst keine anderen visuellen Bestätigungen.',
@@ -65,12 +64,17 @@ $lang = array_merge($lang, [
 	'CONTACT_BOT_POSTER_EXPLAIN'	=> 'Wenn aktiviert, scheinen PNs und Beiträge basierend auf den Einstellungen hier vom oben ausgewählten Kontakt-Bot-Benutzer zu stammen. Wenn “Keiner” ausgewählt ist, wird der Bot nicht als Poster verwendet. Beiträge und PNs werden basierend auf den im Kontaktformular eingegebenen Informationen veröffentlicht.',
 	'CONTACT_BOT_USER'				=> 'Kontakt-Bot-Benutzer',
 	'CONTACT_BOT_USER_EXPLAIN'		=> 'Bitte Benutzer auswählen, unter dem Nachrichten gepostet werden, wenn die Kontaktmethode auf “Private Nachricht” oder “Forumsbeitrag” eingestellt ist.',
-	'CONTACT_NO_BOT_USER'			=> '<strong>Die ausgewählte Kontakt-Bot-Benutzer-ID existiert nicht</strong>',
+	'CONTACT_NO_BOT_USER'			=> '<strong>Der ausgewählte Kontakt-Bot-Benutzer existiert nicht</strong>',
 	'CONTACT_BOT_IS_BOT'			=> '<strong>Der ausgewählte Kontakt-Bot wird als Bot des Forums bezeichnet. Sicher, dass dieser Benutzer als Bot benutzt werden soll?</strong>',
+	'CONTACT_BOT_IS_GUEST'			=> '<strong>Der ausgewählte Kontakt-Bot ist das Gast-Konto des Forums. Sicher, dass dieser Benutzer als Bot benutzt werden soll?</strong>',
 	'CONTACT_USERNAME_CHK'			=> 'Benutzername prüfen',
 	'CONTACT_USERNAME_CHK_EXPLAIN'	=> 'Wenn aktiviert, wird der eingegebene Benutzername mit denen in der Datenbank verglichen. Wenn der Name gefunden wird, wird dem Benutzer eine Fehlermeldung angezeigt und er wird aufgefordert, einen anderen Benutzernamen einzugeben.',
 	'CONTACT_EMAIL_CHK'				=> 'E-Mail prüfen',
 	'CONTACT_EMAIL_CHK_EXPLAIN'		=> 'Wenn aktiviert, wird die E-Mail-Adresse des Benutzers mit denen in der Datenbank abgeglichen. Wenn die E-Mail-Adresse gefunden wird, wird dem Benutzer eine Fehlermeldung angezeigt und er wird aufgefordert, eine andere E-Mail-Adresse einzugeben.',
+	'CONTACT_HEADER_LINK'			=> 'Link in der oberen Navigationsleiste anzeigen',
+	'CONTACT_HEADER_LINK_EXPLAIN'	=> 'Zeigt einen „Kontakt“-Link in der Navigationsleiste oben auf jeder Seite an.',
+	'CONTACT_FOOTER_LINK'			=> 'Link in der unteren Navigationsleiste anzeigen',
+	'CONTACT_FOOTER_LINK_EXPLAIN'	=> 'Zeigt einen „Kontakt“-Link in der Navigationsleiste unten auf jeder Seite an. Sind beide Links ausgeschaltet, bleibt das Kontaktformular unter seiner bisherigen Adresse erreichbar.',
 
 	// Contact methods
 	'CONTACT_METHOD_EMAIL'			=> 'E-Mail',

@@ -1,13 +1,14 @@
 <?php
 /**
-*
-* Contact admin extension for the phpBB Forum Software package.
-*
-* @copyright 2016 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
-namespace rmcgirr83\contactadmin\controller;
+ *
+ * Contact Admin extension for the phpBB Forum Software package
+ *
+ * @copyright 2016 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
+namespace phpbbmodders\contactadmin\controller;
 
 use phpbb\auth\auth;
 use phpbb\config\config;
@@ -20,8 +21,10 @@ use phpbb\log\log;
 use phpbb\request\request;
 use phpbb\template\template;
 use phpbb\user;
-use rmcgirr83\contactadmin\core\contactadmin as contactadmin;
+use phpbbmodders\contactadmin\core\contactadmin as contactadmin;
 use phpbb\captcha\factory as captcha_factory;
+use phpbb\captcha\plugins\confirm_type;
+use phpbb\captcha\plugins\plugin_interface;
 use phpbb\exception\http_exception;
 
 /**
@@ -45,7 +48,7 @@ class main_controller
 	protected $db;
 
 	/** @var dispatcher_interface */
-	protected $dispatcher_interface;
+	protected $dispatcher;
 
 	/** @var language */
 	protected $language;
@@ -53,7 +56,7 @@ class main_controller
 	/** @var log */
 	protected $log;
 
-	/* @var request */
+	/** @var request */
 	protected $request;
 
 	/** @var template */
@@ -62,7 +65,7 @@ class main_controller
 	/** @var user */
 	protected $user;
 
-	/* @var contactadmin */
+	/** @var contactadmin */
 	protected $contactadmin;
 
 	/** @var captcha_factory */
@@ -142,7 +145,7 @@ class main_controller
 	public function displayform()
 	{
 		$this->language->add_lang(['ucp', 'posting']);
-		$this->language->add_lang('contact', 'rmcgirr83/contactadmin');
+		$this->language->add_lang('contact', 'phpbbmodders/contactadmin');
 
 		// move this from the constructor so the query isn't run on every page
 		$contact_reasons = $this->db_text->get_array(['contactadmin_reasons']);
@@ -150,7 +153,7 @@ class main_controller
 		//convert the reasons string into an array
 		if (!empty($contact_reasons['contactadmin_reasons']))
 		{
-			$contact_reasons = explode("\n",$contact_reasons['contactadmin_reasons']);
+			$contact_reasons = explode("\n", $contact_reasons['contactadmin_reasons']);
 		}
 		else
 		{
@@ -166,9 +169,9 @@ class main_controller
 		{
 
 			// add an entry into the error log
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONTACT_EMAIL_INVALID',  time());
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_CONTACT_EMAIL_INVALID', time());
 
-			$message = $this->language->lang('CONTACT_MAIL_DISABLED', '<a href="mailto:' . htmlspecialchars($this->config['board_contact']) . '">', '</a>');
+			$message = $this->language->lang('CONTACT_MAIL_DISABLED', '<a href="mailto:' . utf8_htmlspecialchars($this->config['board_contact']) . '">', '</a>');
 
 			return $this->helper->message($message);
 		}
@@ -193,9 +196,12 @@ class main_controller
 			$this->config['contactadmin_confirm'] = false;
 		}
 
+		// Whether the sender is a guest; decided now, because the user may be swapped for the contact bot later
+		$sender_is_guest = ($this->user->data['user_id'] == ANONYMOUS);
+
 		// our data array
 		$data = [
-			'username'			=> ($this->user->data['user_id'] != ANONYMOUS) ?  $this->user->data['username'] : $this->request->variable('username', '', true),
+			'username'			=> ($this->user->data['user_id'] != ANONYMOUS) ? $this->user->data['username'] : $this->request->variable('username', '', true),
 			'email'				=> ($this->user->data['user_id'] != ANONYMOUS) ? $this->user->data['user_email'] : strtolower($this->request->variable('email', '')),
 			'email_confirm'		=> ($this->user->data['user_id'] != ANONYMOUS) ? $this->user->data['user_email'] : strtolower($this->request->variable('email_confirm', '')),
 			'contact_reason'	=> $this->request->variable('contact_reason', '', true),
@@ -209,7 +215,16 @@ class main_controller
 		if ($this->config['contactadmin_confirm'])
 		{
 			$captcha = $this->captcha_factory->get_instance($this->config['captcha_plugin']);
-			$captcha->init($this->contact_constants['CONFIRM_CONTACT']);
+
+			// phpBB 4.0 captchas take a confirm_type, 3.3 captchas the matching number
+			if ($captcha instanceof plugin_interface)
+			{
+				$captcha->init(confirm_type::from($this->contact_constants['CONFIRM_CONTACT']));
+			}
+			else
+			{
+				$captcha->init($this->contact_constants['CONFIRM_CONTACT']);
+			}
 		}
 
 		if ($this->request->is_set_post('submit'))
@@ -232,35 +247,35 @@ class main_controller
 			{
 				if ($this->config['contactadmin_username_chk'] && $this->config['contactadmin_email_chk'])
 				{
-					$error = validate_data($data, [
+					$error = array_merge($error, validate_data($data, [
 						'username'			=> [
 							['string', false, $this->config['min_name_chars'], $this->config['max_name_chars']],
 							['username', '']],
 						'email'				=> [
 							['string', false, 6, 60],
 							['user_email']],
-						]);
+						]));
 				}
 				else if ($this->config['contactadmin_username_chk'])
 				{
-					$error = validate_data($data, [
+					$error = array_merge($error, validate_data($data, [
 						'username'			=> [
 							['string', false, $this->config['min_name_chars'], $this->config['max_name_chars']],
 							['username', '']],
-						]);
+						]));
 				}
 				else
 				{
-					$error = validate_data($data, [
+					$error = array_merge($error, validate_data($data, [
 						'email'				=> [
 							['string', false, 6, 60],
 							['user_email']],
-					]);
+					]));
 				}
 			}
 
 			// always check email addresses for validity but only if setting in ACP isn't set and only for non-registered users
-			if (!$this->config['contactadmin_email_check'] && empty($this->user->data['is_registered']))
+			if (!$this->config['contactadmin_email_chk'] && empty($this->user->data['is_registered']))
 			{
 				$validate_email = phpbb_validate_email($data['email']);
 				if ($validate_email)
@@ -305,16 +320,27 @@ class main_controller
 			// Check for Privacy policy check
 			if (empty($this->user->data['is_registered']) && $this->config['contactadmin_gdpr'] && !$this->request->is_set('gdpr'))
 			{
-				$error[] = $this->user->lang('CONTACT_PRIVACYPOLICY_ERROR');
+				$error[] = $this->language->lang('CONTACT_PRIVACYPOLICY_ERROR');
 			}
 
 			// CAPTCHA check
 			if ($this->config['contactadmin_confirm'] && !$captcha->is_solved())
 			{
-				$vc_response = $captcha->validate($data);
-				if ($vc_response !== false)
+				// phpBB 4.0 captchas return true or false, 3.3 captchas an error message or false
+				if ($captcha instanceof plugin_interface)
 				{
-					$error[] = $vc_response;
+					if (!$captcha->validate())
+					{
+						$error[] = $captcha->get_error();
+					}
+				}
+				else
+				{
+					$vc_response = $captcha->validate($data);
+					if ($vc_response !== false)
+					{
+						$error[] = $vc_response;
+					}
 				}
 
 				if ($this->config['contactadmin_max_attempts'] && $captcha->get_attempt_count() > $this->config['contactadmin_max_attempts'])
@@ -334,13 +360,16 @@ class main_controller
 				$user_name = $data['username'];
 			}
 
+			// Name shown on a forum post; $data['username'] keeps the sender's name for listeners
+			$poster_name = $data['username'];
+
 			if (!in_array($this->config['contactadmin_method'], [$this->contact_constants['CONTACT_METHOD_EMAIL']]))
 			{
 				// change the users stuff
 				if ($this->config['contactadmin_bot_poster'] == $this->contact_constants['CONTACT_POST_ALL'] || ($this->config['contactadmin_bot_poster'] == $this->contact_constants['CONTACT_POST_GUEST'] && empty($this->user->data['is_registered'])))
 				{
 					$contact_perms = $this->contactadmin->contact_change_auth($this->config['contactadmin_bot_user']);
-					$data['username'] = $this->user->data['username'];
+					$poster_name = $this->user->data['username'];
 				}
 				if (!function_exists('create_thumbnail'))
 				{
@@ -390,16 +419,16 @@ class main_controller
 			/**
 			* Modify data and error strings
 			*
-			* @event rmcgirr83.contactadmin.modify_data_and_error
+			* @event phpbbmodders.contactadmin.modify_data_and_error
 			* @var array	error			Error strings
 			* @var array	data			An array with data
 			* @since 1.0.0
 			*/
 			$vars = ['error', 'data'];
-			extract($this->dispatcher->trigger_event('rmcgirr83.contactadmin.modify_data_and_error', compact($vars)));
+			extract($this->dispatcher->trigger_event('phpbbmodders.contactadmin.modify_data_and_error', compact($vars)));
 
 			// no errors, let's proceed
-			if (!sizeof($error))
+			if (!count($error))
 			{
 				if ($this->config['contactadmin_method'] != $this->contact_constants['CONTACT_METHOD_POST'])
 				{
@@ -409,7 +438,7 @@ class main_controller
 				$subject = (!empty($data['contact_reason'])) ? $data['contact_reason'] : $data['contact_subject'];
 				if (in_array($this->config['contactadmin_method'], [$this->contact_constants['CONTACT_METHOD_POST'], $this->contact_constants['CONTACT_METHOD_PM']]))
 				{
-					$subject = ($this->user->data['user_id'] != ANONYMOUS) ? $subject . ' - ' . $this->language->lang('CONTACT_REGISTERED') : $subject . ' -  ' . $this->language->lang('CONTACT_GUEST');
+					$subject .= ' - ' . $this->language->lang($sender_is_guest ? 'CONTACT_GUEST' : 'CONTACT_REGISTERED');
 				}
 
 				switch ($this->config['contactadmin_method'])
@@ -435,13 +464,9 @@ class main_controller
 							'filename_data'		=> $message_parser->filename_data,
 						];
 
-						// Loop through our list of users
-						$size = count($contact_users);
-						for ($i = 0; $i < $size; $i++)
-						{
-							$pm_data['address_list'] = ['u' => [$contact_users[$i]['user_id'] => 'to']];
-							submit_pm('post', $subject, $pm_data, false);
-						}
+						// One PM to all admins, as blind copies so each sees only their own copy
+						$pm_data['address_list'] = ['u' => array_fill_keys(array_map('intval', array_column($contact_users, 'user_id')), 'bcc')];
+						submit_pm('post', $subject, $pm_data, false);
 
 					break;
 
@@ -480,13 +505,13 @@ class main_controller
 							'enable_indexing'	=> true,
 
 							'force_approved_state'	=> ITEM_APPROVED,
-							'force_visibility' => ITEM_APPROVED,
+							'force_visibility'		=> ITEM_APPROVED,
 						];
 
 						$poll = [];
 
 						// Submit the post!
-						submit_post('post', $subject, $data['username'], POST_NORMAL, $poll, $post_data);
+						submit_post('post', $subject, $poster_name, POST_NORMAL, $poll, $post_data);
 
 					break;
 
@@ -499,26 +524,9 @@ class main_controller
 						$message = preg_replace($bbcode_remove, '', $message);
 						$message = htmlspecialchars_decode($message);
 
-						if (!class_exists('messenger'))
-						{
-							include($this->root_path . 'includes/functions_messenger.' . $this->php_ext);
-						}
-						// Some of the code borrowed from includes/ucp/ucp_register.php
-						// The first argument of messenger::messenger() decides if it uses the message queue (which we will not)
-						$messenger = new \messenger(false);
-
-						// Email headers
-						$messenger->headers('X-AntiAbuse: Board servername - ' . $this->config['server_name']);
-						$messenger->headers('X-AntiAbuse: User_id - ' . $this->user->data['user_id']);
-						$messenger->headers('X-AntiAbuse: Username - ' . $this->user->data['username']);
-						$messenger->headers('X-AntiAbuse: User IP - ' . $this->user->ip);
-
-						$contact_name = htmlspecialchars_decode($this->config['board_contact_name']);
-						$board_contact = (($contact_name !== '') ? '"' . mail_encode($contact_name) . '" ' : '') . '<' . $this->config['board_contact'] . '>';
-
 						// build an array of all lang directories for the extension and check to make sure we have the lang available that is being chosen
 						// if the lang isn't present then errors will present themselves due to no email template found
-						$dir_array = $this->contactadmin->dir_to_array($this->root_path .'ext/rmcgirr83/contactadmin/language');
+						$dir_array = $this->contactadmin->dir_to_array($this->root_path . 'ext/phpbbmodders/contactadmin/language');
 
 						$size = count($contact_users);
 						// Loop through our list of users
@@ -526,7 +534,7 @@ class main_controller
 						{
 							$tz = (!empty($contact_users[$i]['user_timezone']) ? $contact_users[$i]['user_timezone'] : $this->config['board_timezone']);
 							$iso = (!empty($contact_users[$i]['user_lang']) ? $contact_users[$i]['user_lang'] : $this->config['default_lang']);
-							$date_format =(!empty($contact_users[$i]['user_dateformat']) ? $contact_users[$i]['user_dateformat'] : $this->config['default_dateformat']);
+							$date_format = (!empty($contact_users[$i]['user_dateformat']) ? $contact_users[$i]['user_dateformat'] : $this->config['default_dateformat']);
 							$time = time();
 
 							// use PHP IntlDateFormatter if possible
@@ -543,22 +551,14 @@ class main_controller
 							}
 							else
 							{
-								$date = new \DateTime("now", new \DateTimeZone($tz));
+								$date = new \DateTime('now', new \DateTimeZone($tz));
 								$date = $date->format($date_format);
 							}
 
 							// now check if the email template may exist.  Can't be helped if there is a lang dir and no email dir
 							// use en if not exist
-							$contact_users[$i]['user_lang'] =  (in_array($contact_users[$i]['user_lang'], $dir_array)) ? $contact_users[$i]['user_lang'] : 'en';
-							$messenger->template('@rmcgirr83_contactadmin/contact', $contact_users[$i]['user_lang']);
-
-							$messenger->to($contact_users[$i]['user_email'], $contact_users[$i]['username']);
-							$messenger->im($contact_users[$i]['user_jabber'], $contact_users[$i]['username']);
-							$messenger->from($board_contact);
-							$messenger->replyto($data['email']);
-							$messenger->subject($subject);
-
-							$messenger->assign_vars([
+							$contact_users[$i]['user_lang'] = (in_array($contact_users[$i]['user_lang'], $dir_array)) ? $contact_users[$i]['user_lang'] : 'en';
+							$this->contactadmin->send_email('@phpbbmodders_contactadmin/contact', $contact_users[$i]['user_lang'], $contact_users[$i], [
 								'ADM_USERNAME'	=> htmlspecialchars_decode($contact_users[$i]['username']),
 								'SITENAME'		=> htmlspecialchars_decode($this->config['sitename']),
 								'USER_IP'		=> $this->user->ip,
@@ -568,13 +568,12 @@ class main_controller
 
 								'SUBJECT'		=> $subject,
 								'MESSAGE'		=> $message,
+							], [
+								'from'		=> [$this->config['board_contact'], $this->config['board_contact_name']],
+								'reply_to'	=> $data['email'],
+								'subject'	=> $subject,
 							]);
-
-							$messenger->send($contact_users[$i]['user_notify_type']);
 						}
-
-						// Save emails in the queue to prevent timeouts
-						$messenger->save_queue();
 
 					break;
 				}
@@ -615,7 +614,7 @@ class main_controller
 
 		// the forum allows attachments?
 		$post_attachments_allowed = $this->config['allow_attachments'] ? true : false;
-		$pm_attachments_allowed = $post_attachments_allowed && $this->config['allow_pm_attach'] ?  true : false;
+		$pm_attachments_allowed = $post_attachments_allowed && $this->config['allow_pm_attach'] ? true : false;
 
 		// forum and contact form allows attachments
 		if ($post_attachments_allowed && $this->config['contactadmin_method'] == $this->contact_constants['CONTACT_METHOD_POST'])
@@ -653,16 +652,17 @@ class main_controller
 			);
 		}
 
-		$privacy_policy_url = generate_board_url() . '/ucp.' . $this->php_ext . '?mode=privacy';
+		$privacy_policy_url = append_sid(generate_board_url() . '/ucp.' . $this->php_ext, 'mode=privacy');
 
 		$this->template->assign_vars([
 			'USERNAME'			=> isset($data['username']) ? $data['username'] : '',
 			'EMAIL'				=> isset($data['email']) ? $data['email'] : '',
 			'EMAIL_CONFIRM'		=> isset($data['email_confirm']) ? $data['email_confirm'] : '',
-			'CONTACT_REASONS'	=> $this->contactadmin->contact_make_select($contact_reasons, $data['contact_reason']),
+			'S_CONTACT_REASONS'	=> !empty($contact_reasons),
 			'CONTACT_SUBJECT'	=> isset($data['contact_subject']) ? $data['contact_subject'] : '',
 			'CONTACT_MESSAGE'	=> isset($data['contact_message']) ? $data['contact_message'] : '',
 			'CONTACT_INFO'		=> $l_admin_info,
+			'FILE_COMMENT'		=> $this->request->variable('filecomment', '', true),
 
 			'PRIVACY_POLICY_URL'	=> $privacy_policy_url,
 			'L_CONTACT_YOUR_NAME_EXPLAIN'	=> $this->config['contactadmin_username_chk'] ? $this->language->lang($this->config['allow_name_chars'] . '_EXPLAIN', $this->config['min_name_chars'], $this->config['max_name_chars']) : $this->language->lang('CONTACT_YOUR_NAME_EXPLAIN'),
@@ -674,9 +674,14 @@ class main_controller
 			'S_CONTACT_ADMIN'		=> true,
 			'S_HIDDEN_FIELDS'		=> $s_hidden_fields,
 			'S_ERROR'				=> (isset($error) && count($error)) ? implode('<br />', $error) : '',
-			'S_CONTACT_ACTION'		=> $this->helper->route('rmcgirr83_contactadmin_displayform'),
+			'S_CONTACT_ACTION'		=> $this->helper->route('phpbbmodders_contactadmin_displayform'),
 			'S_CONTACT_GDPR'		=> ($this->config['contactadmin_gdpr'] && empty($this->user->data['is_registered'])) ? true : false,
 		]);
+
+		foreach ($this->contactadmin->contact_reason_options($contact_reasons, $data['contact_reason']) as $option)
+		{
+			$this->template->assign_block_vars('contact_reasons', $option);
+		}
 
 		// Send all data to the template file
 		return $this->helper->render('contactadmin_body.html', $this->language->lang('ACP_CAT_CONTACTADMIN'));

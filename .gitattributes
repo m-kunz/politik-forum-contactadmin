@@ -1,3 +1,16 @@
+# Shared line endings and binary files
+* text=auto eol=lf
+
+# Normalize line endings to LF in the repository
+
+# Never convert line endings in binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+
 tests/			export-ignore
 .github/		export-ignore
 .gitignore		export-ignore
@@ -6,3 +19,6 @@ phpunit.xml.*	export-ignore
 build.xml		export-ignore
 composer.lock	export-ignore
 README.md		export-ignore
+.editorconfig	export-ignore
+docs/images/		export-ignore
+docs/update/		export-ignore

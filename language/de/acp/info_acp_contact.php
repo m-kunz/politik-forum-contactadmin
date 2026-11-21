@@ -4,6 +4,7 @@
 * Contact admin extension for the phpBB Forum Software package.
 *
 * @copyright 2016 Rich McGirr (RMcGirr83)
+* @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
 * @license GNU General Public License, version 2 (GPL-2.0)
 * German translation by NetSecond.net 02/2024
 *
@@ -41,17 +42,9 @@ $lang = array_merge($lang, [
 	'FORUM_EMAIL_INACTIVE'	=> 'Wie Benutzer den Kontakt aufnehmen können.<br><span style="color:red;">Laut Foreneinstellungen sind keine E-Mails erlaubt!</span>',
 	'NO_FORUM_ATTACHMENTS'		=> 'Wenn aktiviert, sind Anhänge beim Posten im Forum und in privaten Nachrichten erlaubt. Die zulässigen Erweiterungen entsprechen der Boardkonfiguration.<br><span style="color:red;">Laut Foreneinstellungen sind keine Anhänge erlaubt!</span>',
 	// Log entries
-	'LOG_CONFIG_CONTACT_ADMIN'		=> '<strong>Die Einstellungen der Admin-kontaktieren-Erweiterungsseite wurden geändert.</strong>',
 	'LOG_CONTACT_BOT_INVALID'		=> '<strong>Für den Admin-kontaktieren-Bot wurde eine ungültige Benutzer ID ausgewählt:</strong><br />Benutzer ID %1$s',
 	'LOG_CONTACT_FORUM_INVALID'		=> '<strong>Im Forum der Admin-kontaktieren-Erweiterung wurde ein ungültiges Forum ausgewählt:</strong><br />Forum ID %1$s',
-	'LOG_CONTACT_EMAIL_INVALID'		=> '<strong>Die Admin-kontaktieren-Erweiterung lässt E-Mails zu, jedoch das Forum nicht. Die Erweiterung wurde deaktiviert.',
+	'LOG_CONTACT_EMAIL_INVALID'		=> '<strong>Die Admin-kontaktieren-Erweiterung ist auf das Senden von E-Mails eingestellt, das Board ist jedoch nicht für das Senden von E-Mails eingerichtet.</strong>',
 	'LOG_CONTACT_NONE'				=> '<strong>Es gibt keine Administratoren, die Benutzern erlauben, diese per %1$s in der Admin-kontaktieren-Erweiterung zu kontaktieren.</strong>',
 	'LOG_CONTACT_CONFIG_UPDATE'		=> '<strong>Admin-kontaktieren-Konfiguration aktualisiert</strong>',
-	//Donation
-	'PAYPAL_IMAGE_URL'          => 'https://www.paypalobjects.com/webstatic/en_US/i/btn/png/silver-pill-paypal-26px.png',
-	'PAYPAL_ALT'                => 'Spenden über PayPal',
-	'BUY_ME_A_BEER_URL'         => 'https://paypal.me/RMcGirr83',
-	'BUY_ME_A_BEER'				=> 'Gib mir ein Bier für die Erstellung dieser Erweiterung aus',
-	'BUY_ME_A_BEER_SHORT'		=> 'Spende für diese Erweiterung',
-	'BUY_ME_A_BEER_EXPLAIN'		=> 'Diese Erweiterung ist völlig kostenlos. Es ist ein Projekt, dem ich meine Zeit zum Vergnügen und Nutzen der phpBB-Community widme. Wenn Sie diese Erweiterung gerne nutzen oder Ihr Forum davon profitiert hat, denken Sie bitte darüber nach, <a href="https://paypal.me/RMcGirr83" target="_blank" rel="noreferrer noopener">mir ein Bier auszugeben</a>. Das wäre wirklich großartig. <i class="fa fa-smile-o" style="color:green;font-size:1.5em;" aria-hidden="true"></i>',
 ]);

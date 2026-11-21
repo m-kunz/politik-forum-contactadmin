@@ -1,12 +1,10 @@
 name: Tests
 
 env:
-    EXTNAME: rmcgirr83/contactadmin # Your extension vendor/package name
+    EXTNAME: phpbbmodders/contactadmin # Your extension vendor/package name
     SNIFF: 1            # Run code sniffer on your code? 1 or 0
     IMAGE_ICC: 1        # Run icc profile sniffer on your images? 1 or 0
-    EPV: 1              # Run EPV (Extension Pre Validator) on your code? 1 or 0
     EXECUTABLE_FILES: 1 # Run check for executable files? 1 or 0
-    PHPBB_BRANCH: 3.3.x # The phpBB branch to run tests on
 
 on:
     push:
@@ -19,24 +17,35 @@ on:
             - develop
 
 jobs:
-    # START Basic Checks Job (EPV, code sniffer, images check, etc.)
+    # START Basic Checks Job (code sniffer, images check, etc.)
     basic-checks:
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
         strategy:
             matrix:
+               # php-versions: ['8.1']
                 include:
-                    - db: 'none'
-                      php: '7.3'
+                    # phpBB 3.3 with the extension's minimum PHP
+                    - php: '8.3'
+                      db: 'none'
                       NOTESTS: 1
+                      phpbb: '3.3.x'
+                    # phpBB 4.0 (the master branch) with the extension's minimum PHP
+                    - php: '8.3'
+                      db: 'none'
+                      NOTESTS: 1
+                      phpbb: 'master'
 
-        name: PHP ${{ matrix.php }} - ${{ matrix.db }}
+        name: PHP ${{ matrix.php }} - ${{ matrix.db }}${{ matrix.phpbb == 'master' && ' - phpBB 4.0' || '' }}
 
         steps:
+            - name: Update apt package index
+              run: sudo apt update
+
             - name: Checkout phpBB
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   repository: phpbb/phpbb
-                  ref: ${{ env.PHPBB_BRANCH }}
+                  ref: ${{ matrix.phpbb }}
                   path: phpBB3
 
             - name: Checkout extension
@@ -59,11 +68,6 @@ jobs:
               run: .github/setup-phpbb.sh $DB $PHP_VERSION $NOTESTS
               working-directory: ./phpBB3
 
-            - name: Setup EPV
-              if: ${{ env.EPV != 0 }}
-              run: composer require phpbb/epv:dev-master --dev --no-interaction --ignore-platform-reqs
-              working-directory: ./phpBB3/phpBB
-
             - name: Run code sniffer
               if: ${{ env.SNIFF != 0 }}
               env:
@@ -80,9 +84,12 @@ jobs:
               if: ${{ env.EXECUTABLE_FILES != 0 }}
               run: .github/ext-check-executable-files.sh ./ $EXTNAME
               working-directory: ./phpBB3
-
-            - name: Run EPV
-              if: ${{ env.EPV != 0 }}
-              run: phpBB/vendor/bin/EPV.php run --dir="phpBB/ext/$EXTNAME/"
-              working-directory: ./phpBB3
     # END Basic Checks Job
+
+    # EPV (Extension Pre Validator), failing on any Fatal or Error finding not
+    # listed in .github/epv-allowed.txt
+    epv:
+        uses: phpbbmodders/.github/.github/workflows/epv.yml@v1
+        with:
+            EXTNAME: phpbbmodders/contactadmin
+            PHPBB_BRANCHES: '["3.3.x", "master"]'

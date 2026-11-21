@@ -1,12 +1,13 @@
 <?php
 /**
-*
-* Contact Admin extension for the phpBB Forum Software package.
-*
-* @copyright 2016 Rich McGirr (RMcGirr83)
-* @license GNU General Public License, version 2 (GPL-2.0)
-*
-*/
+ *
+ * Contact Admin extension for the phpBB Forum Software package
+ *
+ * @copyright 2016 Rich McGirr (RMcGirr83)
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 /**
 * DO NOT CHANGE
 */
@@ -37,13 +38,11 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, [
-	'ADMINS_NOT_EXIST_FOR_METHOD'	=> [
-		0 => 'There are no Administrators who allow emails.  You must choose a different method of contact.',
-		2 => 'There are no Administrators who allow private messages. You must choose a different method of contact.',
-	],
+	'ADMINS_NOT_EXIST_EMAIL'		=> 'There are no Administrators who allow emails. You must choose a different method of contact.',
+	'ADMINS_NOT_EXIST_PM'		=> 'There are no Administrators who allow private messages. You must choose a different method of contact.',
 	'CONTACT_CONFIG_SAVED'			=> 'Contact Admin configuration has been updated',
 	'CONTACT_ACP_CONFIRM'				=> 'Enable visual confirmation',
-	'CONTACT_ACP_CONFIRM_EXPLAIN'		=> 'If you enable this option, users will have to enter a visual confirmation to send the message.<br>This is to prevent spam messages. Note that this option is for the contact page only.  It does not affect other visual confirmation settings',
+	'CONTACT_ACP_CONFIRM_EXPLAIN'		=> 'If you enable this option, users will have to enter a visual confirmation to send the message.<br>This is to prevent spam messages. Note that this option is for the contact page only. It does not affect other visual confirmation settings',
 	'CONTACT_ATTACHMENTS'				=> 'Attachments allowed',
 	'CONTACT_ATTACHMENTS_EXPLAIN'		=> 'If set attachments will be allowed in posting to the forum and private messages.<br>The extensions allowed are the same as the board configuration.<br><span style="color:red;">Does not apply for contact method via “EMail”.</span>',
 	'CONTACT_CONFIRM_GUESTS'			=> 'Visual confirmation for guests only',
@@ -61,15 +60,20 @@ $lang = array_merge($lang, [
 	'CONTACT_BOT_FORUM'				=> 'Contact bot forum',
 	'CONTACT_BOT_FORUM_EXPLAIN'		=> 'Select the forum, where the contact bot should post to, if the contact method is set to “Forum post”',
 	'CONTACT_BOT_POSTER'			=> 'Bot as Poster',
-	'CONTACT_BOT_POSTER_EXPLAIN'	=> 'If set PM’s and posts will seem to come from the contact bot user chosen above based on the settings here. If “Neither” is selected then the bot is not used as the poster.  Posts and PM’s will be posted based on the information entered in the contact form',
+	'CONTACT_BOT_POSTER_EXPLAIN'	=> 'If set PM’s and posts will seem to come from the contact bot user chosen above based on the settings here. If “Neither” is selected then the bot is not used as the poster. Posts and PM’s will be posted based on the information entered in the contact form',
 	'CONTACT_BOT_USER'				=> 'Contact bot user',
 	'CONTACT_BOT_USER_EXPLAIN'		=> 'Select the user that messages will be posted under if the contact method is set to “Private Message” or “Forum Post”.',
-	'CONTACT_NO_BOT_USER'			=> '<strong>The contact bot user id chosen does not exist</strong>',
+	'CONTACT_NO_BOT_USER'			=> '<strong>The contact bot user chosen does not exist</strong>',
 	'CONTACT_BOT_IS_BOT'			=> '<strong>The contact bot chosen is designated as a bot of the forum. Are you sure you want this user as the bot?</strong>',
+	'CONTACT_BOT_IS_GUEST'			=> '<strong>The contact bot chosen is designated as the guest account of the forum. Are you sure you want this user as the bot?</strong>',
 	'CONTACT_USERNAME_CHK'			=> 'Check Username',
 	'CONTACT_USERNAME_CHK_EXPLAIN'	=> 'If set yes, the user’s name that is entered will be checked against those in the database. If the name is found the user will be presented with an error and asked to input a different user name',
 	'CONTACT_EMAIL_CHK'				=> 'Check Email',
 	'CONTACT_EMAIL_CHK_EXPLAIN'		=> 'If set yes, the user’s email address will be checked against those in the database. If the email address is found the user will be presented with an error and asked to input a different email address',
+	'CONTACT_HEADER_LINK'			=> 'Show link in header navigation',
+	'CONTACT_HEADER_LINK_EXPLAIN'	=> 'Show a “Contact us” link in the navigation bar at the top of every page.',
+	'CONTACT_FOOTER_LINK'			=> 'Show link in footer navigation',
+	'CONTACT_FOOTER_LINK_EXPLAIN'	=> 'Show a “Contact us” link in the navigation bar at the bottom of every page. With both links off, the contact page still works at its usual address.',
 
 	// Contact methods
 	'CONTACT_METHOD_EMAIL'			=> 'Email',
